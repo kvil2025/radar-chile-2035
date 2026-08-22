@@ -162,5 +162,35 @@ export const api = {
     const res = await fetch(`${API_BASE}/energy/node-prices/${busId}`);
     if (!res.ok) throw new Error('Failed to fetch node prices');
     return res.json();
+  },
+
+  // ----------------- COSTO MARGINAL ML & REGULATION -----------------
+  async getCostoMarginalSummary(): Promise<any> {
+    const res = await fetch(`${API_BASE}/costo-marginal/dataset-summary`);
+    if (!res.ok) throw new Error('Failed to fetch costo marginal summary');
+    return res.json();
+  },
+
+  async trainAndForecastCostoMarginal(horizonHours: number = 72, nEstimators: number = 60): Promise<any> {
+    const res = await fetch(`${API_BASE}/costo-marginal/train-predict?horizon_hours=${horizonHours}&n_estimators=${nEstimators}`, {
+      method: 'POST'
+    });
+    if (!res.ok) throw new Error('Failed to train forecast model');
+    return res.json();
+  },
+
+  async getClimateCorrelations(): Promise<any> {
+    const res = await fetch(`${API_BASE}/costo-marginal/climate-correlation`);
+    if (!res.ok) throw new Error('Failed to fetch climate correlations');
+    return res.json();
+  },
+
+  async getRegulatoryCorpus(query?: string, category?: string): Promise<any[]> {
+    let url = `${API_BASE}/costo-marginal/regulatory-corpus?`;
+    if (query) url += `query=${encodeURIComponent(query)}&`;
+    if (category) url += `category=${encodeURIComponent(category)}&`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to fetch regulatory corpus');
+    return res.json();
   }
 };

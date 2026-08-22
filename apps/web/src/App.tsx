@@ -25,6 +25,7 @@ import { PanelProjectSitingOptimizer } from './components/PanelProjectSitingOpti
 import { PanelEnergyGridMap } from './components/PanelEnergyGridMap';
 import { PanelGenerationAndDemandMix } from './components/PanelGenerationAndDemandMix';
 import { PanelNodeOpportunityRanking } from './components/PanelNodeOpportunityRanking';
+import { PanelCostoMarginalML } from './components/PanelCostoMarginalML';
 import { TimeSeriesChartModal } from './components/TimeSeriesChartModal';
 import { NodePriceChartModal } from './components/NodePriceChartModal';
 import { Compass, BookOpen } from 'lucide-react';
@@ -43,7 +44,7 @@ export const App: React.FC = () => {
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<
-    'ENERGY_SITING' | 'ENERGY_GRID' | 'ENERGY_DISPATCH' | 'ENERGY_RANKING' | 'OVERVIEW' | 'CHIEF_ECONOMIST' | 'STRESS_TEST' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'
+    'ENERGY_SITING' | 'COSTO_MARGINAL_ML' | 'ENERGY_GRID' | 'ENERGY_DISPATCH' | 'ENERGY_RANKING' | 'OVERVIEW' | 'CHIEF_ECONOMIST' | 'STRESS_TEST' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'
   >('ENERGY_SITING');
 
   const loadData = async () => {
@@ -170,6 +171,7 @@ export const App: React.FC = () => {
           <div className="border-b border-border-subtle flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1">
             {[
               { key: 'ENERGY_SITING', label: '⚡ Siting Optimizer (Top Barras)' },
+              { key: 'COSTO_MARGINAL_ML', label: '📈 Pronóstico ML & Regulación' },
               { key: 'ENERGY_GRID', label: '🗺️ Mapa SEN & Barras' },
               { key: 'ENERGY_DISPATCH', label: '🔋 Despacho & Mix' },
               { key: 'ENERGY_RANKING', label: '📊 Scoring Nodal' },
@@ -199,6 +201,12 @@ export const App: React.FC = () => {
           {activeTab === 'ENERGY_SITING' && (
             <div className="animate-in fade-in duration-200">
               <PanelProjectSitingOptimizer />
+            </div>
+          )}
+
+          {activeTab === 'COSTO_MARGINAL_ML' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelCostoMarginalML />
             </div>
           )}
 
