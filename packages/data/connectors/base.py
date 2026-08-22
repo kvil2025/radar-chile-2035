@@ -33,8 +33,8 @@ class BaseConnector(abc.ABC):
 
     @retry(
         reraise=True,
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
+        stop=stop_after_attempt(2),
+        wait=wait_exponential(multiplier=0.5, min=0.5, max=2),
         retry=retry_if_exception_type((httpx.RequestError, httpx.HTTPStatusError))
     )
     def fetch_url(self, url: str, params: Optional[dict] = None, headers: Optional[dict] = None) -> httpx.Response:

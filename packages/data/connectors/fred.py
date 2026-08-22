@@ -40,9 +40,13 @@ class FREDConnector(BaseConnector):
     def __init__(self):
         super().__init__(
             provider_name="FRED",
-            base_url="https://api.stlouisfed.org/fred/series/observations"
+            base_url="https://api.stlouisfed.org/fred/series/observations",
+            timeout=2.0
         )
-        self.api_key = settings.FRED_API_KEY
+        import os
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+        self.api_key = os.getenv("FRED_API_KEY", settings.FRED_API_KEY)
 
     def fetch_observations(
         self, 
@@ -76,6 +80,8 @@ class FREDConnector(BaseConnector):
                         "observation_start": start_date.isoformat(),
                         "observation_end": end_date.isoformat(),
                     }
+                    if code == "US_CPI":
+                        params["units"] = "pc1"  # Percent Change from Year Ago
                     res = self.fetch_url(self.base_url, params=params)
                     data = res.json()
                     for item in data.get("observations", []):
