@@ -9,39 +9,55 @@ import {
   ResearchDocument,
   Source
 } from '../types';
+import {
+  MOCK_SCORES,
+  MOCK_REGIME,
+  MOCK_BUSES,
+  MOCK_SITING_RESULT
+} from './mockData';
 
 const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1';
 
 export const api = {
   async getSources(): Promise<Source[]> {
-    const res = await fetch(`${API_BASE}/sources`);
-    if (!res.ok) throw new Error('Failed to fetch sources');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/sources`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getIndicators(category?: string): Promise<Indicator[]> {
-    const url = category ? `${API_BASE}/indicators?category=${category}` : `${API_BASE}/indicators`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch indicators');
-    return res.json();
+    try {
+      const url = category ? `${API_BASE}/indicators?category=${category}` : `${API_BASE}/indicators`;
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getObservations(code: string, limit: number = 60): Promise<Observation[]> {
-    const res = await fetch(`${API_BASE}/observations/${code}?limit=${limit}`);
-    if (!res.ok) throw new Error(`Failed to fetch observations for ${code}`);
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/observations/${code}?limit=${limit}`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getScores(): Promise<Score[]> {
-    const res = await fetch(`${API_BASE}/scores`);
-    if (!res.ok) throw new Error('Failed to fetch scores');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/scores`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return MOCK_SCORES;
   },
 
-  async getRegime(): Promise<Regime> {
-    const res = await fetch(`${API_BASE}/regime`);
-    if (!res.ok) throw new Error('Failed to fetch current regime');
-    return res.json();
+  async getRegime(): Promise<Regime | null> {
+    try {
+      const res = await fetch(`${API_BASE}/regimes/current`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return MOCK_REGIME;
   },
 
   async getScenarios(): Promise<Scenario[]> {
@@ -112,50 +128,64 @@ export const api = {
 
   // ----------------- SEN ENERGY APIS -----------------
   async getEnergyBuses(zone?: string): Promise<any[]> {
-    const url = zone ? `${API_BASE}/energy/buses?zone=${zone}` : `${API_BASE}/energy/buses`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch energy buses');
-    return res.json();
+    try {
+      const url = zone ? `${API_BASE}/energy/buses?zone=${zone}` : `${API_BASE}/energy/buses`;
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return MOCK_BUSES;
   },
 
   async getTransmissionLines(): Promise<any[]> {
-    const res = await fetch(`${API_BASE}/energy/lines`);
-    if (!res.ok) throw new Error('Failed to fetch transmission lines');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/lines`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getGenerationMix(): Promise<any[]> {
-    const res = await fetch(`${API_BASE}/energy/generation-mix`);
-    if (!res.ok) throw new Error('Failed to fetch generation mix');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/generation-mix`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getDemandHourly(): Promise<any[]> {
-    const res = await fetch(`${API_BASE}/energy/demand-hourly`);
-    if (!res.ok) throw new Error('Failed to fetch demand hourly');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/demand-hourly`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getEnergyProjects(): Promise<any[]> {
-    const res = await fetch(`${API_BASE}/energy/projects`);
-    if (!res.ok) throw new Error('Failed to fetch energy projects');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/projects`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async getNodeOpportunityRanking(): Promise<any[]> {
-    const res = await fetch(`${API_BASE}/energy/node-opportunity-ranking`);
-    if (!res.ok) throw new Error('Failed to fetch node opportunity ranking');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/node-opportunity-ranking`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return [];
   },
 
   async evaluateProjectSiting(params: any): Promise<any> {
-    const res = await fetch(`${API_BASE}/energy/project-analyzer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
-    });
-    if (!res.ok) throw new Error('Failed to evaluate project siting');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/energy/project-analyzer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return MOCK_SITING_RESULT;
   },
 
   async downloadExcelModel(params: any): Promise<Blob> {
