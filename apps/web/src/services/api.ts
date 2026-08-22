@@ -158,6 +158,26 @@ export const api = {
     return res.json();
   },
 
+  async downloadExcelModel(params: any): Promise<Blob> {
+    const res = await fetch(`${API_BASE}/energy/export/excel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Failed to download Excel model');
+    return res.blob();
+  },
+
+  async getInvestmentMemoHtml(params: any): Promise<string> {
+    const res = await fetch(`${API_BASE}/energy/export/memo-html`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Failed to get Investment Memo HTML');
+    return res.text();
+  },
+
   async getNodePrices(busId: number): Promise<any[]> {
     const res = await fetch(`${API_BASE}/energy/node-prices/${busId}`);
     if (!res.ok) throw new Error('Failed to fetch node prices');

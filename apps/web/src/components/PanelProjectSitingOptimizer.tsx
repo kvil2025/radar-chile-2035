@@ -171,8 +171,62 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
 
         </div>
 
-        {/* Action Button */}
-        <div className="flex justify-end">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={async () => {
+                try {
+                  const blob = await api.downloadExcelModel({
+                    technology,
+                    capacity_mw: Number(capacityMw),
+                    storage_mwh: Number(storageMwh),
+                    target_cod_year: Number(targetCodYear),
+                    lifetime_years: Number(lifetimeYears),
+                    discount_rate_pct: Number(discountRatePct)
+                  });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `Modelo_Financiero_SEN_${technology}_${capacityMw}MW.xls`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-gold-light border border-navy-700 hover:border-gold-primary/40 font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all"
+            >
+              <span>📥 Descargar Modelo Excel (.xls)</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                try {
+                  const html = await api.getInvestmentMemoHtml({
+                    technology,
+                    capacity_mw: Number(capacityMw),
+                    storage_mwh: Number(storageMwh),
+                    target_cod_year: Number(targetCodYear),
+                    lifetime_years: Number(lifetimeYears),
+                    discount_rate_pct: Number(discountRatePct)
+                  });
+                  const win = window.open('', '_blank');
+                  if (win) {
+                    win.document.write(html);
+                    win.document.close();
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-bg-card hover:bg-bg-card-hover text-slate-300 border border-border-subtle hover:text-white font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all"
+            >
+              <span>📄 Ver Memorándum de Inversión (PDF)</span>
+            </button>
+          </div>
+
           <button
             onClick={handleEvaluate}
             disabled={isCalculating}

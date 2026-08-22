@@ -57,3 +57,32 @@ def test_project_analyzer_endpoint(client):
     assert "top_buses_ranking" in data
     assert len(data["top_buses_ranking"]) == 10
     assert data["top_buses_ranking"][0]["rank"] == 1
+
+def test_export_excel_endpoint(client):
+    payload = {
+        "technology": "SOLAR_PLUS_BESS",
+        "capacity_mw": 100.0,
+        "storage_mwh": 400.0,
+        "target_cod_year": 2029,
+        "lifetime_years": 25,
+        "discount_rate_pct": 8.0
+    }
+    res = client.post("/api/v1/energy/export/excel", json=payload)
+    assert res.status_code == 200
+    assert "application/vnd.ms-excel" in res.headers["content-type"]
+    assert len(res.content) > 500
+    assert b"Resumen Ejecutivo" in res.content
+
+def test_export_memo_html_endpoint(client):
+    payload = {
+        "technology": "SOLAR_PLUS_BESS",
+        "capacity_mw": 100.0,
+        "storage_mwh": 400.0,
+        "target_cod_year": 2029,
+        "lifetime_years": 25,
+        "discount_rate_pct": 8.0
+    }
+    res = client.post("/api/v1/energy/export/memo-html", json=payload)
+    assert res.status_code == 200
+    assert "text/html" in res.headers["content-type"]
+    assert b"MEMOR\xc3\x81NDUM DE INVERSI\xc3\x93N" in res.content or b"MEMORANDUM" in res.content or b"RADAR CHILE" in res.content

@@ -238,3 +238,38 @@ def evaluate_project_siting(req: ProjectEvaluationRequest, db: Session = Depends
     """
     evaluator = ProjectEvaluator(db=db)
     return evaluator.evaluate_project(req)
+
+@router.post("/export/excel")
+def export_excel_model(req: ProjectEvaluationRequest, db: Session = Depends(get_db)):
+    """
+    Generates and downloads a complete multi-tab Microsoft Excel Financial Model (SpreadsheetML)
+    with executive summary, Top 10 siting ranking, and 25-year cash flow projections.
+    """
+    from fastapi.responses import Response
+    from packages.energy.report_generator import InvestmentReportGenerator
+
+    evaluator = ProjectEvaluator(db=db)
+    result = evaluator.evaluate_project(req)
+    xml_content = InvestmentReportGenerator.generate_excel_spreadsheetml(result)
+
+    return Response(
+        content=xml_content.encode("utf-8"),
+        media_type="application/vnd.ms-excel",
+        headers={
+            "Content-Disposition": 'attachment; filename="modelo_financiero_sen_2035.xls"'
+        }
+    )
+
+@router.post("/export/memo-html")
+def export_investment_memo_html(req: ProjectEvaluationRequest, db: Session = Depends(get_db)):
+    """
+    Generates an institutional, printable Executive Investment Memorandum & Diligence Report.
+    """
+    from fastapi.responses import HTMLResponse
+    from packages.energy.report_generator import InvestmentReportGenerator
+
+    evaluator = ProjectEvaluator(db=db)
+    result = evaluator.evaluate_project(req)
+    html_content = InvestmentReportGenerator.generate_investment_memo_html(result)
+
+    return HTMLResponse(content=html_content)
