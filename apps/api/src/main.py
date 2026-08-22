@@ -62,15 +62,33 @@ app.include_router(agents.router)
 app.include_router(energy.router)
 app.include_router(costo_marginal.router)
 
-@app.get("/")
-def root():
-    return {
-        "project": "RADAR CHILE 2035",
-        "description": "Plataforma de Inteligencia Cuantitativa y Transmisión Macroeconómica",
-        "version": settings.VERSION,
-        "docs_url": "/docs",
-        "health_url": "/health"
-    }
+# Mount Frontend SPA if dist folder exists (Unified Docker / Railway / Cloud Run mode)
+import os
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+DIST_DIR = Path(__file__).resolve().parent.parent.parent.parent / "apps" / "web" / "dist"
+
+if DIST_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(DIST_DIR / "assets")), name="static-assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        file_path = DIST_DIR / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(DIST_DIR / "index.html")
+else:
+    @app.get("/")
+    def root():
+        return {
+            "project": "RADAR CHILE 2035",
+            "description": "Plataforma de Inteligencia Cuantitativa y Transmisión Macroeconómica",
+            "version": settings.VERSION,
+            "docs_url": "/docs",
+            "health_url": "/health"
+        }
 
 if __name__ == "__main__":
     import uvicorn
