@@ -18,6 +18,8 @@ import { PanelChileRealtime } from './components/PanelChileRealtime';
 import { PanelScenarios } from './components/PanelScenarios';
 import { PanelTransmissionMatrix } from './components/PanelTransmissionMatrix';
 import { PanelAlerts } from './components/PanelAlerts';
+import { PanelChiefEconomist } from './components/PanelChiefEconomist';
+import { PanelStressTesting } from './components/PanelStressTesting';
 import { TimeSeriesChartModal } from './components/TimeSeriesChartModal';
 import { Compass, BookOpen } from 'lucide-react';
 
@@ -33,7 +35,7 @@ export const App: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<Score | null>(null);
   const [selectedIndicator, setSelectedIndicator] = useState<Indicator | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MARKETS' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'CHIEF_ECONOMIST' | 'STRESS_TEST' | 'MARKETS' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'>('OVERVIEW');
 
   const loadData = async () => {
     try {
@@ -156,9 +158,11 @@ export const App: React.FC = () => {
           )}
 
           {/* Section Navigation Tabs */}
-          <div className="border-b border-border-subtle flex items-center space-x-1 sm:space-x-3 overflow-x-auto pb-1">
+          <div className="border-b border-border-subtle flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1">
             {[
               { key: 'OVERVIEW', label: 'Panorama General' },
+              { key: 'CHIEF_ECONOMIST', label: '✨ Economista Jefe (IA)' },
+              { key: 'STRESS_TEST', label: '🧪 Simulador de Shocks' },
               { key: 'MARKETS', label: 'Mercados & Commodities' },
               { key: 'SCENARIOS', label: 'Escenarios (S1-S4)' },
               { key: 'CHILE_IMPACT', label: 'Transmisión Chile' },
@@ -180,6 +184,17 @@ export const App: React.FC = () => {
           </div>
 
           {/* Tab Views */}
+          {activeTab === 'CHIEF_ECONOMIST' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelChiefEconomist />
+            </div>
+          )}
+
+          {activeTab === 'STRESS_TEST' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelStressTesting />
+            </div>
+          )}
           {activeTab === 'OVERVIEW' && (
             <div className="space-y-8 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

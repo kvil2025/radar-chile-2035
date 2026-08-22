@@ -76,5 +76,37 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to trigger recalculation');
     return res.json();
+  },
+
+  async getBriefing(): Promise<any> {
+    const res = await fetch(`${API_BASE}/agents/briefing`);
+    if (!res.ok) throw new Error('Failed to fetch briefing');
+    return res.json();
+  },
+
+  async askChiefEconomist(question: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/agents/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+    if (!res.ok) throw new Error('Failed to query chief economist');
+    return res.json();
+  },
+
+  async simulateShock(params: {
+    copper_price: number;
+    us10y_yield: number;
+    oil_price?: number;
+    china_pmi?: number;
+    dxy_index?: number;
+  }): Promise<any> {
+    const res = await fetch(`${API_BASE}/agents/simulate-shock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Failed to simulate shock');
+    return res.json();
   }
 };
