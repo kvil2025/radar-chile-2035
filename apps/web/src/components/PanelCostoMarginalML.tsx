@@ -33,6 +33,24 @@ export const PanelCostoMarginalML: React.FC = () => {
   const [regSearchQuery, setRegSearchQuery] = useState<string>('');
   const [regCategory, setRegCategory] = useState<string>('ALL');
 
+  // AI Advisor state
+  const [aiQuery, setAiQuery] = useState<string>('');
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [isConsultingAi, setIsConsultingAi] = useState<boolean>(false);
+
+  const handleConsultAdvisor = async () => {
+    if (!aiQuery.trim()) return;
+    setIsConsultingAi(true);
+    try {
+      const resp = await api.consultRegulatoryAdvisor(aiQuery);
+      setAiResponse(resp);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsConsultingAi(false);
+    }
+  };
+
   useEffect(() => {
     Promise.all([
       api.getCostoMarginalSummary().catch(() => null),
@@ -442,8 +460,44 @@ export const PanelCostoMarginalML: React.FC = () => {
           ))}
         </div>
 
-      </div>
+        {/* Interactive AI Regulatory Advisor (Gemini) */}
+        <div className="mt-8 p-5 rounded-2xl bg-gradient-to-r from-navy-950/80 to-[#111115] border border-gold-primary/30 space-y-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-gold-primary/15 border border-gold-primary/40 flex items-center justify-center text-gold-primary">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white tracking-wide">Asesor Legal & Regulatorio IA (Google Gemini)</h4>
+              <p className="text-[11px] text-slate-400 font-mono">Consulta dudas jurídicas sobre DFL 4, Ley 21.505 BESS, DS 88 PMGD y Resoluciones CNE</p>
+            </div>
+          </div>
 
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="Ej: ¿Qué requisitos del DS 88 aplican para conectar un BESS de 9 MW en régimen PMGD?"
+              value={aiQuery}
+              onChange={(e) => setAiQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleConsultAdvisor()}
+              className="flex-1 bg-[#0a0a0c] border border-border-subtle focus:border-gold-primary/60 rounded-xl px-4 py-2.5 text-xs text-white outline-none"
+            />
+            <button
+              onClick={handleConsultAdvisor}
+              disabled={isConsultingAi}
+              className="px-5 py-2.5 bg-gradient-to-r from-gold-primary to-gold-light text-black font-bold text-xs rounded-xl hover:opacity-95 transition-all flex items-center justify-center space-x-1.5 disabled:opacity-50"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${isConsultingAi ? 'animate-spin' : ''}`} />
+              <span>{isConsultingAi ? 'Consultando Leyes...' : 'Consultar a la IA'}</span>
+            </button>
+          </div>
+
+          {aiResponse && (
+            <div className="p-4 rounded-xl bg-[#09090b] border border-border-subtle text-xs text-slate-200 leading-relaxed font-sans prose prose-invert max-w-none whitespace-pre-wrap animate-in fade-in duration-200">
+              {aiResponse}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

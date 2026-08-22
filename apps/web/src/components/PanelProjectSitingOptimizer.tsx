@@ -13,6 +13,9 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
 
   const [result, setResult] = useState<ProjectEvaluationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [aiThesis, setAiThesis] = useState<string | null>(null);
+  const [isGeneratingThesis, setIsGeneratingThesis] = useState<boolean>(false);
+  const [showThesisModal, setShowThesisModal] = useState<boolean>(false);
 
   const handleEvaluate = async () => {
     setIsCalculating(true);
@@ -30,6 +33,26 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
       console.error('Error evaluating project siting:', err);
     } finally {
       setIsCalculating(false);
+    }
+  };
+
+  const handleGenerateThesis = async () => {
+    setIsGeneratingThesis(true);
+    setShowThesisModal(true);
+    try {
+      const thesis = await api.generateAiInvestmentThesis({
+        technology,
+        capacity_mw: Number(capacityMw),
+        storage_mwh: Number(storageMwh),
+        target_cod_year: Number(targetCodYear),
+        lifetime_years: Number(lifetimeYears),
+        discount_rate_pct: Number(discountRatePct)
+      });
+      setAiThesis(thesis);
+    } catch (err) {
+      console.error('Error generating AI thesis:', err);
+    } finally {
+      setIsGeneratingThesis(false);
     }
   };
 
@@ -198,7 +221,7 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
               }}
               className="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-gold-light border border-navy-700 hover:border-gold-primary/40 font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all"
             >
-              <span>📥 Descargar Modelo Excel (.xls)</span>
+              <span>📥 Descargar Excel (.xls)</span>
             </button>
 
             <button
@@ -223,7 +246,16 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
               }}
               className="px-4 py-2 rounded-xl bg-bg-card hover:bg-bg-card-hover text-slate-300 border border-border-subtle hover:text-white font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all"
             >
-              <span>📄 Ver Memorándum de Inversión (PDF)</span>
+              <span>📄 Ver Memorándum (PDF)</span>
+            </button>
+
+            <button
+              onClick={handleGenerateThesis}
+              disabled={isGeneratingThesis}
+              className="px-4 py-2 rounded-xl bg-gold-primary/10 hover:bg-gold-primary/20 text-gold-light border border-gold-primary/40 font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm"
+            >
+              <Sparkles className={`w-3.5 h-3.5 text-gold-primary ${isGeneratingThesis ? 'animate-spin' : ''}`} />
+              <span>{isGeneratingThesis ? 'Redactando con Gemini...' : '✨ Tesis de Inversión con IA'}</span>
             </button>
           </div>
 
@@ -236,8 +268,55 @@ export const PanelProjectSitingOptimizer: React.FC = () => {
             <span>{isCalculating ? 'Calculando Top Barras...' : 'Optimizar Localización en el SEN'}</span>
           </button>
         </div>
-
       </div>
+
+      {/* AI Investment Thesis Modal */}
+      {showThesisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#0e0e11] border border-gold-primary/40 rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-navy-950/60">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-gold-primary/15 border border-gold-primary/40 flex items-center justify-center text-gold-primary">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-wide">Tesis de Inversión Cuantitativa (Google Gemini)</h3>
+                  <p className="text-xs text-slate-400 font-mono">Evaluación de Siting & Retorno Ajustado por Riesgo SEN</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowThesisModal(false)}
+                className="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-slate-200 text-sm leading-relaxed font-sans">
+              {isGeneratingThesis ? (
+                <div className="py-16 flex flex-col items-center justify-center space-y-3">
+                  <div className="w-8 h-8 border-2 border-gold-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-slate-400 font-mono">Razonando con Google Gemini 1.5 Flash...</p>
+                </div>
+              ) : (
+                <div className="prose prose-invert max-w-none prose-sm whitespace-pre-wrap">
+                  {aiThesis}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-border-subtle bg-bg-card flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-mono">RADAR CHILE 2035 • AI Investment Committee</span>
+              <button
+                onClick={() => setShowThesisModal(false)}
+                className="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-white text-xs font-semibold"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Financial Summary & Ranking Table */}
       {result && (

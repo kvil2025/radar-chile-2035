@@ -273,3 +273,73 @@ def export_investment_memo_html(req: ProjectEvaluationRequest, db: Session = Dep
     html_content = InvestmentReportGenerator.generate_investment_memo_html(result)
 
     return HTMLResponse(content=html_content)
+
+# ---------------------------------------------------------
+# GOOGLE GEMINI AI COPILOT & REGULATORY INTELLIGENCE
+# ---------------------------------------------------------
+
+@router.post("/ai/thesis")
+def generate_ai_investment_thesis(req: ProjectEvaluationRequest, db: Session = Depends(get_db)):
+    """
+    Generates a high-level institutional AI investment thesis with Google Gemini
+    for the project configuration and highest-ranked SEN bus.
+    """
+    from packages.ai.energy_copilot import EnergyAICopilot
+    evaluator = ProjectEvaluator(db=db)
+    result = evaluator.evaluate_project(req)
+    top_bus = result.top_buses_ranking[0].model_dump() if result.top_buses_ranking else {}
+
+    copilot = EnergyAICopilot()
+    thesis_md = copilot.generate_siting_thesis(req.model_dump(), top_bus)
+    return {
+        "project": req.model_dump(),
+        "top_bus": top_bus,
+        "thesis_markdown": thesis_md
+    }
+
+@router.post("/ai/regulatory-advisor")
+def consult_regulatory_advisor(payload: dict):
+    """
+    Consults the AI Regulatory & Legal Engineering Advisor (Ana IA 2.0)
+    for questions regarding DFL 4, Ley 21.505 BESS, DS 88 PMGD, and CNE norms.
+    """
+    from packages.ai.energy_copilot import EnergyAICopilot
+    query = payload.get("query", "")
+    if not query:
+        return {"response_markdown": "Por favor ingresa una consulta sobre la normativa eléctrica chilena."}
+    
+    copilot = EnergyAICopilot()
+    response_md = copilot.answer_regulatory_query(query)
+    return {
+        "query": query,
+        "response_markdown": response_md
+    }
+
+@router.post("/ai/dispatch-synthesis")
+def synthesize_dispatch_ai(db: Session = Depends(get_db)):
+    """
+    Analyzes the latest SEN dispatch mix and duck curve dynamics with Google Gemini.
+    """
+    from packages.ai.energy_copilot import EnergyAICopilot
+    latest_gen = db.query(GenerationHourly).order_by(GenerationHourly.timestamp.desc()).first()
+    latest_demand = db.query(DemandHourly).order_by(DemandHourly.timestamp.desc()).first()
+
+    mix_data = []
+    if latest_gen:
+        tot = latest_gen.total_generation_mw or 10000.0
+        mix_data = [
+            {"tech": "Solar PV", "gen_mw": latest_gen.solar_mw, "share_pct": round((latest_gen.solar_mw / tot) * 100, 1)},
+            {"tech": "Eólica", "gen_mw": latest_gen.wind_mw, "share_pct": round((latest_gen.wind_mw / tot) * 100, 1)},
+            {"tech": "Hidroeléctrica", "gen_mw": latest_gen.hydro_mw, "share_pct": round((latest_gen.hydro_mw / tot) * 100, 1)},
+            {"tech": "Gas Natural", "gen_mw": latest_gen.thermal_gas_mw, "share_pct": round((latest_gen.thermal_gas_mw / tot) * 100, 1)},
+            {"tech": "BESS Storage", "gen_mw": latest_gen.bess_discharge_mw, "share_pct": round((latest_gen.bess_discharge_mw / tot) * 100, 1)},
+        ]
+    demand_mw = latest_demand.total_demand_mw if latest_demand else 9800.0
+
+    copilot = EnergyAICopilot()
+    synthesis_md = copilot.explain_dispatch_and_grid(mix_data, demand_mw)
+    return {
+        "demand_mw": demand_mw,
+        "mix": mix_data,
+        "synthesis_markdown": synthesis_md
+    }

@@ -86,3 +86,32 @@ def test_export_memo_html_endpoint(client):
     assert res.status_code == 200
     assert "text/html" in res.headers["content-type"]
     assert b"MEMOR\xc3\x81NDUM DE INVERSI\xc3\x93N" in res.content or b"MEMORANDUM" in res.content or b"RADAR CHILE" in res.content
+
+def test_ai_thesis_endpoint(client):
+    payload = {
+        "technology": "SOLAR_PLUS_BESS",
+        "capacity_mw": 100.0,
+        "storage_mwh": 400.0,
+        "target_cod_year": 2029,
+        "lifetime_years": 25,
+        "discount_rate_pct": 8.0
+    }
+    res = client.post("/api/v1/energy/ai/thesis", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "thesis_markdown" in data
+    assert len(data["thesis_markdown"]) > 50
+
+def test_ai_regulatory_advisor_endpoint(client):
+    res = client.post("/api/v1/energy/ai/regulatory-advisor", json={"query": "Requisitos para conectar un BESS bajo la Ley 21.505"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "response_markdown" in data
+    assert len(data["response_markdown"]) > 50
+
+def test_ai_dispatch_synthesis_endpoint(client):
+    res = client.post("/api/v1/energy/ai/dispatch-synthesis")
+    assert res.status_code == 200
+    data = res.json()
+    assert "synthesis_markdown" in data
+    assert "demand_mw" in data

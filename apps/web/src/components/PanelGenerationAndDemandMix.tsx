@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { GenerationHourly, DemandHourly } from '../types/energy';
-import { Activity, Sun, Wind, Droplets, Flame, BatteryCharging } from 'lucide-react';
+import { Activity, Sun, Wind, Droplets, Flame, BatteryCharging, Sparkles } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -17,6 +17,23 @@ export const PanelGenerationAndDemandMix: React.FC = () => {
   const [genData, setGenData] = useState<GenerationHourly[]>([]);
   const [demandData, setDemandData] = useState<DemandHourly[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [aiSynthesis, setAiSynthesis] = useState<string | null>(null);
+  const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
+  const [showAiModal, setShowAiModal] = useState<boolean>(false);
+
+  const handleSynthesize = async () => {
+    setIsSynthesizing(true);
+    setShowAiModal(true);
+    try {
+      const syn = await api.synthesizeDispatchAi();
+      setAiSynthesis(syn);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSynthesizing(false);
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -119,7 +136,7 @@ export const PanelGenerationAndDemandMix: React.FC = () => {
 
       {/* Hourly Generation & Demand Mix Chart */}
       <div className="glass-panel p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-lg bg-gold-primary/15 border border-gold-primary/30 flex items-center justify-center text-gold-primary">
               <Activity className="w-4 h-4" />
@@ -133,6 +150,15 @@ export const PanelGenerationAndDemandMix: React.FC = () => {
               </p>
             </div>
           </div>
+
+          <button
+            onClick={handleSynthesize}
+            disabled={isSynthesizing}
+            className="px-4 py-2 rounded-xl bg-gold-primary/10 hover:bg-gold-primary/20 text-gold-light border border-gold-primary/40 font-mono text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm"
+          >
+            <Sparkles className={`w-3.5 h-3.5 text-gold-primary ${isSynthesizing ? 'animate-spin' : ''}`} />
+            <span>{isSynthesizing ? 'Analizando con Gemini...' : '✨ Diagnóstico con IA (Gemini)'}</span>
+          </button>
         </div>
 
         <div className="h-72 w-full mt-2">
@@ -166,6 +192,54 @@ export const PanelGenerationAndDemandMix: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* AI Dispatch Synthesis Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#0e0e11] border border-gold-primary/40 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-navy-950/60">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-xl bg-gold-primary/15 border border-gold-primary/40 flex items-center justify-center text-gold-primary">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-wide">Diagnóstico Instantáneo de Despacho (Google Gemini)</h3>
+                  <p className="text-xs text-slate-400 font-mono">Curva de Pato Solar, Arbitraje BESS & Costos Marginales SEN</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAiModal(false)}
+                className="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-slate-200 text-sm leading-relaxed font-sans">
+              {isSynthesizing ? (
+                <div className="py-16 flex flex-col items-center justify-center space-y-3">
+                  <div className="w-8 h-8 border-2 border-gold-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-slate-400 font-mono">Analizando matriz de generación y señales de precio con Gemini...</p>
+                </div>
+              ) : (
+                <div className="prose prose-invert max-w-none prose-sm whitespace-pre-wrap">
+                  {aiSynthesis}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-border-subtle bg-bg-card flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-mono">RADAR CHILE 2035 • Realtime Grid Intelligence</span>
+              <button
+                onClick={() => setShowAiModal(false)}
+                className="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-white text-xs font-semibold"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

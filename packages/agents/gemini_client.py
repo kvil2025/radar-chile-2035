@@ -13,11 +13,11 @@ class GeminiClient:
     and grounded query answering for RADAR CHILE 2035.
     """
 
-    MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        self.client = httpx.Client(timeout=30.0)
+        self.client = httpx.Client(timeout=10.0)
 
     def generate_content(self, system_instruction: str, prompt: str) -> str:
         """Call Google Gemini API with system instructions and user prompt."""
