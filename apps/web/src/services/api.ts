@@ -108,5 +108,59 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to simulate shock');
     return res.json();
+  },
+
+  // ----------------- SEN ENERGY APIS -----------------
+  async getEnergyBuses(zone?: string): Promise<any[]> {
+    const url = zone ? `${API_BASE}/energy/buses?zone=${zone}` : `${API_BASE}/energy/buses`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to fetch energy buses');
+    return res.json();
+  },
+
+  async getTransmissionLines(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/lines`);
+    if (!res.ok) throw new Error('Failed to fetch transmission lines');
+    return res.json();
+  },
+
+  async getGenerationMix(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/generation-mix`);
+    if (!res.ok) throw new Error('Failed to fetch generation mix');
+    return res.json();
+  },
+
+  async getDemandHourly(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/demand-hourly`);
+    if (!res.ok) throw new Error('Failed to fetch demand hourly');
+    return res.json();
+  },
+
+  async getEnergyProjects(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/projects`);
+    if (!res.ok) throw new Error('Failed to fetch energy projects');
+    return res.json();
+  },
+
+  async getNodeOpportunityRanking(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/node-opportunity-ranking`);
+    if (!res.ok) throw new Error('Failed to fetch node opportunity ranking');
+    return res.json();
+  },
+
+  async evaluateProjectSiting(params: any): Promise<any> {
+    const res = await fetch(`${API_BASE}/energy/project-analyzer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Failed to evaluate project siting');
+    return res.json();
+  },
+
+  async getNodePrices(busId: number): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/energy/node-prices/${busId}`);
+    if (!res.ok) throw new Error('Failed to fetch node prices');
+    return res.json();
   }
 };

@@ -9,6 +9,7 @@ import {
   Indicator,
   ResearchDocument
 } from './types';
+import { Bus } from './types/energy';
 import { RadarHeader } from './components/RadarHeader';
 import { ScoreCard } from './components/ScoreCard';
 import { ScoreExplainabilityModal } from './components/ScoreExplainabilityModal';
@@ -20,7 +21,12 @@ import { PanelTransmissionMatrix } from './components/PanelTransmissionMatrix';
 import { PanelAlerts } from './components/PanelAlerts';
 import { PanelChiefEconomist } from './components/PanelChiefEconomist';
 import { PanelStressTesting } from './components/PanelStressTesting';
+import { PanelProjectSitingOptimizer } from './components/PanelProjectSitingOptimizer';
+import { PanelEnergyGridMap } from './components/PanelEnergyGridMap';
+import { PanelGenerationAndDemandMix } from './components/PanelGenerationAndDemandMix';
+import { PanelNodeOpportunityRanking } from './components/PanelNodeOpportunityRanking';
 import { TimeSeriesChartModal } from './components/TimeSeriesChartModal';
+import { NodePriceChartModal } from './components/NodePriceChartModal';
 import { Compass, BookOpen } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -34,8 +40,11 @@ export const App: React.FC = () => {
 
   const [selectedScore, setSelectedScore] = useState<Score | null>(null);
   const [selectedIndicator, setSelectedIndicator] = useState<Indicator | null>(null);
+  const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'CHIEF_ECONOMIST' | 'STRESS_TEST' | 'MARKETS' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<
+    'ENERGY_SITING' | 'ENERGY_GRID' | 'ENERGY_DISPATCH' | 'ENERGY_RANKING' | 'OVERVIEW' | 'CHIEF_ECONOMIST' | 'STRESS_TEST' | 'SCENARIOS' | 'CHILE_IMPACT' | 'ALERTS' | 'RESEARCH'
+  >('ENERGY_SITING');
 
   const loadData = async () => {
     try {
@@ -102,7 +111,7 @@ export const App: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-bold text-white font-heading tracking-tight">
-                  Índices Estratégicos Globales & Chile
+                  Índices Estratégicos & Oportunidad Energética (Chile 2035)
                 </h2>
                 <p className="text-xs text-slate-400">
                   Scores cuantitativos normalizados (0-100) con ponderación y explicabilidad transparente
@@ -160,10 +169,13 @@ export const App: React.FC = () => {
           {/* Section Navigation Tabs */}
           <div className="border-b border-border-subtle flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1">
             {[
-              { key: 'OVERVIEW', label: 'Panorama General' },
+              { key: 'ENERGY_SITING', label: '⚡ Siting Optimizer (Top Barras)' },
+              { key: 'ENERGY_GRID', label: '🗺️ Mapa SEN & Barras' },
+              { key: 'ENERGY_DISPATCH', label: '🔋 Despacho & Mix' },
+              { key: 'ENERGY_RANKING', label: '📊 Scoring Nodal' },
+              { key: 'OVERVIEW', label: '🌐 Macro & Commodities' },
               { key: 'CHIEF_ECONOMIST', label: '✨ Economista Jefe (IA)' },
               { key: 'STRESS_TEST', label: '🧪 Simulador de Shocks' },
-              { key: 'MARKETS', label: 'Mercados & Commodities' },
               { key: 'SCENARIOS', label: 'Escenarios (S1-S4)' },
               { key: 'CHILE_IMPACT', label: 'Transmisión Chile' },
               { key: 'ALERTS', label: `Alertas (${alerts.length})` },
@@ -184,6 +196,30 @@ export const App: React.FC = () => {
           </div>
 
           {/* Tab Views */}
+          {activeTab === 'ENERGY_SITING' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelProjectSitingOptimizer />
+            </div>
+          )}
+
+          {activeTab === 'ENERGY_GRID' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelEnergyGridMap onSelectBus={(b) => setSelectedBus(b)} />
+            </div>
+          )}
+
+          {activeTab === 'ENERGY_DISPATCH' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelGenerationAndDemandMix />
+            </div>
+          )}
+
+          {activeTab === 'ENERGY_RANKING' && (
+            <div className="animate-in fade-in duration-200">
+              <PanelNodeOpportunityRanking />
+            </div>
+          )}
+
           {activeTab === 'CHIEF_ECONOMIST' && (
             <div className="animate-in fade-in duration-200">
               <PanelChiefEconomist />
@@ -195,6 +231,7 @@ export const App: React.FC = () => {
               <PanelStressTesting />
             </div>
           )}
+
           {activeTab === 'OVERVIEW' && (
             <div className="space-y-8 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -218,23 +255,6 @@ export const App: React.FC = () => {
 
               <PanelScenarios scenarios={scenarios} />
               <PanelAlerts alerts={alerts} />
-            </div>
-          )}
-
-          {activeTab === 'MARKETS' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <PanelCommoditiesMining
-                indicators={indicators}
-                onSelectIndicator={(ind) => setSelectedIndicator(ind)}
-              />
-              <PanelMacroUSA
-                indicators={indicators}
-                onSelectIndicator={(ind) => setSelectedIndicator(ind)}
-              />
-              <PanelChileRealtime
-                indicators={indicators}
-                onSelectIndicator={(ind) => setSelectedIndicator(ind)}
-              />
             </div>
           )}
 
@@ -268,7 +288,7 @@ export const App: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white font-heading">Documentos de Research & Capa de Conocimiento</h3>
-                  <p className="text-xs text-slate-400">Informes oficiales catalogados del Banco Central, Cochilco y FMI</p>
+                  <p className="text-xs text-slate-400">Informes oficiales catalogados del Banco Central, Cochilco, CNE y Coordinador Eléctrico Nacional</p>
                 </div>
               </div>
 
@@ -315,18 +335,23 @@ export const App: React.FC = () => {
         onClose={() => setSelectedIndicator(null)}
       />
 
+      <NodePriceChartModal
+        bus={selectedBus}
+        onClose={() => setSelectedBus(null)}
+      />
+
       {/* Footer */}
       <footer className="border-t border-border-subtle bg-[#0A0A0B] py-6 px-6 mt-12 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
-            <span className="font-heading font-bold text-slate-300">RADAR CHILE 2035</span>
+            <span className="font-heading font-bold text-slate-300">ENERGY & ECONOMIC INTELLIGENCE CHILE 2035</span>
             <span>•</span>
-            <span>Plataforma de Inteligencia Económica</span>
+            <span>Plataforma Cuantitativa del SEN</span>
             <span>•</span>
             <span className="font-mono text-gold-light">v0.1</span>
           </div>
           <div className="font-mono text-[11px] text-slate-400">
-            Fuentes Oficiales: FRED • Banco Central de Chile • Cochilco • World Bank • Global Markets
+            Coordinador Eléctrico Nacional • CNE • Ministerio de Energía • Cochilco • Banco Central de Chile • FRED
           </div>
         </div>
       </footer>

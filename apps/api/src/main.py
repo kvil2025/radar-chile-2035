@@ -7,7 +7,7 @@ from packages.common.database import init_db
 from apps.api.src.routers import (
     health, sources, indicators, observations, 
     scores, signals, regimes, scenarios, 
-    chile_impact, alerts, research, pipeline, agents
+    chile_impact, alerts, research, pipeline, agents, energy
 )
 
 # Configure logging
@@ -59,6 +59,7 @@ app.include_router(alerts.router)
 app.include_router(research.router)
 app.include_router(pipeline.router)
 app.include_router(agents.router)
+app.include_router(energy.router)
 
 @app.get("/")
 def root():
