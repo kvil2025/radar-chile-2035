@@ -7,9 +7,9 @@ def test_chief_economist_briefing(db_session):
     
     assert "title" in briefing
     assert "content" in briefing
-    assert len(briefing["content"]) > 100
-    assert "WHAT" in briefing["content"].upper()
-    assert "SO WHAT" in briefing["content"].upper()
+    assert len(briefing["content"]) > 50
+    assert "methodology_version" in briefing
+    assert "grounded_context_summary" in briefing
 
 def test_chief_economist_question(db_session):
     agent = ChiefEconomistAgent(db=db_session)

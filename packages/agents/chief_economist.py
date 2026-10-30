@@ -48,7 +48,7 @@ Reglas estrictas de respuesta:
 
 {context}
 
-Estructura el informe con los siguientes títulos en Markdown:
+Estructura el informe manteniendo rigurosamente los siguientes encabezados exactos en Markdown:
 # INFORME EJECUTIVO DE INTELIGENCIA MACROECONÓMICA — RADAR CHILE 2035
 
 ## 1. DIAGNÓSTICO DEL ENTORNO GLOBAL & RÉGIMEN ACTIVO (WHAT)
