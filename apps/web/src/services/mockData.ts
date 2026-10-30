@@ -54,7 +54,7 @@ export const MOCK_SCORES: Score[] = [
     contributors: [
       {
         indicator_code: 'COPPER_LME',
-        indicator_name: 'Cobre LME',
+        indicator_name: 'Cobre Grado A (LME Spot)',
         weight: 0.50,
         raw_value: 4.45,
         normalized_value: 82.0,
@@ -149,7 +149,7 @@ export const MOCK_REGIME: Regime = {
   regime_code: 'GOLDILOCKS_TRANSICION_CHILE',
   confidence: 0.86,
   primary_driver: 'Cobre Favorable & Inversión BESS',
-  rationale: 'Chile experimenta términos de intercambio favorables por el precio del cobre ($4.45/lb) junto con un auge histórico en inversiones de almacenamiento BESS y centros de datos que dinamizan la demanda eléctrica estructural hacia 2035.',
+  rationale: 'Chile experimenta términos de intercambio favorables impulsados por la cotización de referencia del cobre spot en la Bolsa de Metales de Londres (LME) a $4.45 USD/lb, junto con un auge histórico en inversiones de almacenamiento BESS y centros de datos que dinamizan la demanda eléctrica estructural hacia 2035.',
   timestamp: new Date().toISOString()
 };
 

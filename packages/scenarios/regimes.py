@@ -91,7 +91,7 @@ class EconomicRegimeClassifier:
             rationale = (
                 f"Las condiciones macroeconómicas observadas son consistentes con un régimen de COMMODITY_SUPERCYCLE "
                 f"(Nivel de confianza: {int(confidence*100)}%), impulsado principalmente por la cotización del cobre "
-                f"en ${copper:.2f}/lb y el crecimiento de inversión en infraestructura de IA ({ai_capex:.1f}% YoY). "
+                f"en ${copper:.2f} USD/lb (Cobre Grado A - LME Spot) y el crecimiento de inversión en infraestructura de IA ({ai_capex:.1f}% YoY). "
                 f"Existe también presión secundaria de tipo {second_regime}."
             )
         elif top_regime == "MONETARY_STRESS":
