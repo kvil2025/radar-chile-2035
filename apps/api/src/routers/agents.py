@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from packages.agents.chief_economist import ChiefEconomistAgent
 from packages.agents.stress_testing import StressTestingAgent
@@ -10,6 +10,7 @@ router = APIRouter(prefix="/api/v1/agents", tags=["AI Agents & Simulation"])
 
 class AgentQueryRequest(BaseModel):
     question: str = Field(..., description="Pregunta económica o de coyuntura para el Economista Jefe")
+    gemini_api_key: Optional[str] = Field(None, description="API Key opcional de Google Gemini del usuario")
 
 class ShockSimulationRequest(BaseModel):
     copper_price: float = Field(..., description="Precio del Cobre simulado en USD/lb (ej. 3.60 o 5.20)")
@@ -19,15 +20,16 @@ class ShockSimulationRequest(BaseModel):
     dxy_index: Optional[float] = Field(104.5, description="Índice Dólar DXY")
 
 @router.get("/briefing")
-def get_executive_briefing(db: Session = Depends(get_db)):
+def get_executive_briefing(db: Session = Depends(get_db), x_gemini_api_key: Optional[str] = Header(None)):
     """Generate or retrieve a full Chief Economist executive briefing based on verified database state."""
-    agent = ChiefEconomistAgent(db=db)
+    agent = ChiefEconomistAgent(db=db, api_key=x_gemini_api_key)
     return agent.generate_executive_briefing()
 
 @router.post("/query")
-def query_chief_economist(req: AgentQueryRequest, db: Session = Depends(get_db)):
+def query_chief_economist(req: AgentQueryRequest, db: Session = Depends(get_db), x_gemini_api_key: Optional[str] = Header(None)):
     """Ask an analytical question to the Chief Economist Agent grounded in the current quantitative database."""
-    agent = ChiefEconomistAgent(db=db)
+    api_key = req.gemini_api_key or x_gemini_api_key
+    agent = ChiefEconomistAgent(db=db, api_key=api_key)
     return agent.answer_macro_question(question=req.question)
 
 @router.post("/simulate-shock")

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Regime } from '../types';
-import { RefreshCw, Activity, Compass } from 'lucide-react';
+import { RefreshCw, Activity, Compass, Key } from 'lucide-react';
+import { ApiKeyModal } from './ApiKeyModal';
+import { getStoredGeminiKey } from '../services/api';
 
 interface RadarHeaderProps {
   regime: Regime | null;
@@ -9,6 +11,13 @@ interface RadarHeaderProps {
 }
 
 export const RadarHeader: React.FC<RadarHeaderProps> = ({ regime, onRefresh, isRefreshing }) => {
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [hasCustomKey, setHasCustomKey] = useState(false);
+
+  useEffect(() => {
+    setHasCustomKey(!!getStoredGeminiKey());
+  }, [isApiKeyModalOpen]);
+
   const getRegimeColor = (code?: string) => {
     switch (code) {
       case 'COMMODITY_SUPERCYCLE':
@@ -67,6 +76,22 @@ export const RadarHeader: React.FC<RadarHeaderProps> = ({ regime, onRefresh, isR
 
           <div className="flex items-center space-x-2">
             <button
+              onClick={() => setIsApiKeyModalOpen(true)}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 border ${
+                hasCustomKey
+                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20'
+                  : 'bg-navy-900/80 border-navy-700 hover:border-gold-primary/50 text-slate-300 hover:text-white'
+              }`}
+              title="Configurar tu propia API Key de Google Gemini"
+            >
+              <Key className={`w-3.5 h-3.5 ${hasCustomKey ? 'text-emerald-400' : 'text-gold-primary'}`} />
+              <span>{hasCustomKey ? 'Gemini BYOK: Activa' : 'API Key Gemini'}</span>
+              {hasCustomKey && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              )}
+            </button>
+
+            <button
               onClick={onRefresh}
               disabled={isRefreshing}
               className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-bg-card hover:bg-bg-card-hover border border-border-subtle hover:border-gold-primary/40 text-xs font-semibold text-slate-200 transition-all shadow-sm active:scale-95 disabled:opacity-50"
@@ -83,6 +108,11 @@ export const RadarHeader: React.FC<RadarHeaderProps> = ({ regime, onRefresh, isR
         </div>
 
       </div>
+
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+      />
     </header>
   );
 };

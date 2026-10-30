@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.orm import Session
 from packages.common.models import (
     Bus, Substation, TransmissionLine, GenerationPlant, BessUnit,
@@ -279,17 +279,22 @@ def export_investment_memo_html(req: ProjectEvaluationRequest, db: Session = Dep
 # ---------------------------------------------------------
 
 @router.post("/ai/thesis")
-def generate_ai_investment_thesis(req: ProjectEvaluationRequest, db: Session = Depends(get_db)):
+def generate_ai_investment_thesis(
+    req: ProjectEvaluationRequest, 
+    db: Session = Depends(get_db),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
     Generates a high-level institutional AI investment thesis with Google Gemini
     for the project configuration and highest-ranked SEN bus.
+    Supports Bring-Your-Own-Key via X-Gemini-Api-Key header.
     """
     from packages.ai.energy_copilot import EnergyAICopilot
     evaluator = ProjectEvaluator(db=db)
     result = evaluator.evaluate_project(req)
     top_bus = result.top_buses_ranking[0].model_dump() if result.top_buses_ranking else {}
 
-    copilot = EnergyAICopilot()
+    copilot = EnergyAICopilot(api_key=x_gemini_api_key)
     thesis_md = copilot.generate_siting_thesis(req.model_dump(), top_bus)
     return {
         "project": req.model_dump(),
@@ -298,17 +303,22 @@ def generate_ai_investment_thesis(req: ProjectEvaluationRequest, db: Session = D
     }
 
 @router.post("/ai/regulatory-advisor")
-def consult_regulatory_advisor(payload: dict):
+def consult_regulatory_advisor(
+    payload: dict,
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
     Consults the AI Regulatory & Legal Engineering Advisor (Ana IA 2.0)
     for questions regarding DFL 4, Ley 21.505 BESS, DS 88 PMGD, and CNE norms.
+    Supports Bring-Your-Own-Key via X-Gemini-Api-Key header or gemini_api_key in body.
     """
     from packages.ai.energy_copilot import EnergyAICopilot
     query = payload.get("query", "")
+    api_key = payload.get("gemini_api_key") or x_gemini_api_key
     if not query:
         return {"response_markdown": "Por favor ingresa una consulta sobre la normativa eléctrica chilena."}
     
-    copilot = EnergyAICopilot()
+    copilot = EnergyAICopilot(api_key=api_key)
     response_md = copilot.answer_regulatory_query(query)
     return {
         "query": query,
@@ -316,9 +326,13 @@ def consult_regulatory_advisor(payload: dict):
     }
 
 @router.post("/ai/dispatch-synthesis")
-def synthesize_dispatch_ai(db: Session = Depends(get_db)):
+def synthesize_dispatch_ai(
+    db: Session = Depends(get_db),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
     Analyzes the latest SEN dispatch mix and duck curve dynamics with Google Gemini.
+    Supports Bring-Your-Own-Key via X-Gemini-Api-Key header.
     """
     from packages.ai.energy_copilot import EnergyAICopilot
     latest_gen = db.query(GenerationHourly).order_by(GenerationHourly.timestamp.desc()).first()
@@ -336,7 +350,7 @@ def synthesize_dispatch_ai(db: Session = Depends(get_db)):
         ]
     demand_mw = latest_demand.total_demand_mw if latest_demand else 9800.0
 
-    copilot = EnergyAICopilot()
+    copilot = EnergyAICopilot(api_key=x_gemini_api_key)
     synthesis_md = copilot.explain_dispatch_and_grid(mix_data, demand_mw)
     return {
         "demand_mw": demand_mw,

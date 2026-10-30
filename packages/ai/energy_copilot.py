@@ -22,8 +22,8 @@ Tus principios de respuesta:
 4. Estructura con títulos claros, viñetas analíticas y recomendaciones de inversión accionables.
 """
 
-    def __init__(self):
-        self.ai = GeminiClient()
+    def __init__(self, api_key: Optional[str] = None):
+        self.ai = GeminiClient(api_key=api_key)
 
     def generate_siting_thesis(self, project_params: Dict[str, Any], top_bus: Dict[str, Any]) -> str:
         """

@@ -34,10 +34,10 @@ Reglas estrictas de respuesta:
 4. Redacta en español formal, preciso, ejecutivo y directo en formato Markdown.
 """
 
-    def __init__(self, db: Optional[Session] = None):
+    def __init__(self, db: Optional[Session] = None, api_key: Optional[str] = None):
         self.db_provided = db is not None
         self.db = db if db is not None else SessionLocal()
-        self.ai = GeminiClient()
+        self.ai = GeminiClient(api_key=api_key)
 
     def generate_executive_briefing(self) -> dict:
         """Generate a complete executive briefing based on the latest database state."""

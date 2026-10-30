@@ -36,6 +36,26 @@ export const PanelAlerts: React.FC<PanelAlertsProps> = ({ alerts }) => {
     }
   };
 
+  const formatMetric = (val: number, title: string) => {
+    const t = title.toLowerCase();
+    if (t.includes('cobre') || t.includes('copper')) {
+      return `$${val.toFixed(2)} USD/lb`;
+    }
+    if (t.includes('petróleo') || t.includes('oil')) {
+      return `$${val.toFixed(2)} USD/bbl`;
+    }
+    if (t.includes('yield') || t.includes('tasa') || t.includes('%') || t.includes('tpm') || t.includes('spread')) {
+      return `${val.toFixed(2)}%`;
+    }
+    if (t.includes('usdclp') || t.includes('dólar') || t.includes('peso')) {
+      return `$${Math.round(val)} CLP`;
+    }
+    if (t.includes('score') || t.includes('índice') || t.includes('pmi')) {
+      return `${val.toFixed(2)} pts`;
+    }
+    return typeof val === 'number' ? (Number.isInteger(val) ? val.toString() : val.toFixed(2)) : String(val);
+  };
+
   return (
     <div className="glass-panel p-6">
       <div className="flex items-center justify-between mb-4">
@@ -87,13 +107,13 @@ export const PanelAlerts: React.FC<PanelAlertsProps> = ({ alerts }) => {
                   {al.current_value !== undefined && al.current_value !== null && (
                     <div className="font-mono text-xs">
                       <span className="text-slate-500 block text-[10px]">Valor Actual</span>
-                      <span className="text-slate-200 font-bold">{al.current_value}</span>
+                      <span className="text-slate-200 font-bold">{formatMetric(al.current_value, al.title)}</span>
                     </div>
                   )}
                   {al.trigger_value !== undefined && al.trigger_value !== null && (
                     <div className="font-mono text-xs">
                       <span className="text-slate-500 block text-[10px]">Umbral</span>
-                      <span className="text-gold-light font-bold">{al.trigger_value}</span>
+                      <span className="text-gold-light font-bold">{formatMetric(al.trigger_value, al.title)}</span>
                     </div>
                   )}
                 </div>
